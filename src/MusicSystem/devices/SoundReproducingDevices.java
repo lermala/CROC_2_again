@@ -1,4 +1,7 @@
-package MusicSystem;
+package MusicSystem.devices;
+
+import MusicSystem.Song;
+import MusicSystem.carriers.Carrier;
 
 import java.util.ArrayList;
 
@@ -10,42 +13,25 @@ import java.util.ArrayList;
  *  ее исполнителя и название.
  *  В случае, если устройство не может воспроизвести музыку с требуемого носителя выводить соответствующее сообщение
  */
-public class SoundReproducingDevices {
+public abstract class SoundReproducingDevices {
 
-    private String name; // название звуковоспроизводящего устройства
+    protected String name; // название звуковоспроизводящего устройства
 
-    public enum TypeOfDevice {vinylTurntable, universalPlayer, CD};
-    private TypeOfDevice typeOfDevice; // тип звуковоспроизводящего устройства (виниловая вертушка, сд, универсальный плеер и т.д.)
+    protected Carrier carrier; // носитель музыкальных композиций
 
-    private Carrier carrier; // носитель музыкальных композиций
-
-    public SoundReproducingDevices(String name, TypeOfDevice typeOfDevice, Carrier carrier) {
+    public SoundReproducingDevices(String name) { // создаем проигрыватель без носителя. Затем вставляем носитель.
         this.name = name;
-        this.typeOfDevice = typeOfDevice;
-        this.carrier = carrier;
     }
 
-    @Override
-    public String toString() {
-        // переводим тип устройства в строковое значение
-        String typeString = "";
-        switch (this.typeOfDevice)
-        {
-            case vinylTurntable:
-                typeString = "виниловая вертушка";
-                break;
-            case universalPlayer:
-                typeString = "универсальный плеер";
-                break;
-            case CD:
-                typeString = "сд";
-                break;
-        }
+    /**
+     * Функция для проверки типа носителя - подходит ли носитель этому проигрывателю.
+     * @return true - тип носителя может быть проигран
+     *         false - тип носителя НЕ может быть проигран
+     */
+    public abstract String readCarrier(Carrier carrier) ;
 
-        return  name +
-                ", тип устройства=" + typeString +
-                ", носитель={" + carrier +
-                '}';
+    public void setCarrier(Carrier carrier) {
+        this.carrier = carrier;
     }
 
     /**
@@ -53,7 +39,7 @@ public class SoundReproducingDevices {
      * @return если песен нет, то выводится "Ошибка. Устройство не может воспроизвести музыку."
      *         если песни есть, то они выводятся по порядку.
      */
-    public String playMusic(){
+    protected String playMusic(){
         ArrayList<Song> songs = carrier.getSongs(); // все песни, которые есть на носителе
 
         String songsString = ""; // строка, которая содержит результат воспроизвдения
@@ -61,10 +47,12 @@ public class SoundReproducingDevices {
         // проверяем, есть ли песни на устройстве. Если нет, то выводм сообщение об ошибке.
         // Если есть, то выводим список песен
         if (songs.size() == 0){
-            songsString = "Ошибка. Устройство не может воспроизвести музыку.";
+            songsString = "\nНевозможно произвести музыку. Устройство \"" +
+                    carrier.getName() + "\" не имеет песен.";
         } else {
             // каждую песню добавляем в строку
-            songsString += "\nВоспроизводим:";
+            songsString += '\n' + name + ": воспроизводим музыку с устройства \"" +
+                    carrier.getName() + '\"';
             for (Song s:
                     songs) {
                 songsString += "\nСледующая песня: ";
@@ -73,5 +61,12 @@ public class SoundReproducingDevices {
         }
 
         return songsString;
+    }
+
+    @Override
+    public String toString() {
+        return "SoundReproducingDevices{" +
+                "carrier=" + carrier +
+                '}';
     }
 }
